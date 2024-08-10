@@ -18,6 +18,9 @@ class AMT_PT_MainPanel(bpy.types.Panel):
         scene  = context.scene
         
         layout.prop(scene, "akm_center", text="Center of selected vertex")
+        layout.prop(scene, "akm_hide_view", text="Hide view display")
+        layout.prop(scene, "akm_hide_vert", text="Hide unselected vertices")
+        layout.prop(scene, "akm_show_retopo", text="Retopology Display")
         layout.prop(scene, "akm_move_amt", text="Amount of movement")
 
 
