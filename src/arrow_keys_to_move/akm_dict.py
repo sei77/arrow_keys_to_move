@@ -7,7 +7,8 @@ translation_dict = {
         ("*", "Amount of movement") : "Amount of movement",
         ("*", "Hide unselected vertices") : "Hide unselected vertices",
         ("*", "Hide view display") : "Hide view display",
-        ("*", "Retopology Display") : "Retopology Display",
+        ("*", "Retopology display") : "Retopology display",
+        ("*", "Transparent display") : "Transparent display",
     },
     "ja_JP": {
         ("*", "Arrow Move") : "カーソル移動",
@@ -17,6 +18,7 @@ translation_dict = {
         ("*", "Hide unselected vertices") : "非選択の頂点を隠す",
         ("*", "Hide view display") : "ビュー表示を隠す",
         ("*", "Retopology Display") : "リトポロジー表示",
+        ("*", "Transparent display") : "透過表示",
     }
 }
 

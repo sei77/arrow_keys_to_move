@@ -2,7 +2,7 @@
 bl_info = {
     "name"    : "Arrow Keys to move",
     "author"  : "sei77",
-    "version" : (1, 0, 0),
+    "version" : (1, 0, 1),
     "blender" : (4, 0, 0),
     "category": "3D View"
 }

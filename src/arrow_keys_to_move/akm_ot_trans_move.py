@@ -37,22 +37,25 @@ class AKM_OT_ArrowMove(bpy.types.Operator):
         self.original_show_retopo = None
         self.original_cursor_location = None
         self.original_object_location = None
-        self.original_show_xray  = None
-        self.original_xray_alpha = None
+        self.original_sharing_xray = None
         
     def modal(self, context, event):
         
-        # RETURNで終了
-        if event.type in {'LEFTMOUSE'}:
-            if not context.active_object:
-                return {'PASS_THROUGH'}
-        if event.type in {'LEFTMOUSE', 'RET'}:
+        # 編集を確定
+        if event.type in {'LEFTMOUSE', 'RET', 'NUMPAD_ENTER'}:
             self.restore_view(context)
-            self.restore_shading(context)
             if bpy.context.scene.akm_hide_vert:
                 self.restore_verts_disp(context)
             context.area.header_text_set(None)
             return {'FINISHED'}
+        # キャンセル
+        elif event.type in {'RIGHTMOUSE', 'ESC'}:
+            self.restore_view(context)
+            self.restore_verts(context)
+            if bpy.context.scene.akm_hide_vert:
+                self.restore_verts_disp(context)
+            context.area.header_text_set(None)
+            return {'CANCELLED'}
         
         # 透過表示切替
         if event.type in {'X'} and event.value == 'PRESS':
@@ -61,15 +64,16 @@ class AKM_OT_ArrowMove(bpy.types.Operator):
                 shading.show_xray = False
             else:
                 shading.show_xray = True
-                shading.xray_alpha = 0.5
+            bpy.context.scene.akm_xray = shading.show_xray
         
-        # メッシュ編集オーバーレイ-リトポロジー切替
+        # リトポロジー切替
         if event.type in {'R'} and event.value == 'PRESS':
             space_data = context.space_data
             if space_data.overlay.show_retopology:
                 space_data.overlay.show_retopology = False
             else:
                 space_data.overlay.show_retopology = True
+            bpy.context.scene.akm_show_retopo = space_data.overlay.show_retopology
         
         # 移動量変更
         move_amt = bpy.context.scene.akm_move_amt
@@ -90,21 +94,19 @@ class AKM_OT_ArrowMove(bpy.types.Operator):
             move_vertex_to_view(context,  0.0, +move_amt)
         elif event.type in {'DOWN_ARROW'} and event.value == 'PRESS':
             move_vertex_to_view(context,  0.0, -move_amt)
-        # キャンセル
-        elif event.type in {'RIGHTMOUSE', 'ESC'}:
-            self.restore_view(context)
-            self.restore_verts(context)
-            self.restore_shading(context)
-            if bpy.context.scene.akm_hide_vert:
-                self.restore_verts_disp(context)
-            context.area.header_text_set(None)
-            return {'CANCELLED'}
         
         context.area.header_text_set(
-            text="move amount: %.3f " % (bpy.context.scene.akm_move_amt))
+            text="move amount: %.3f %s" % (bpy.context.scene.akm_move_amt, event.type))
         
         # 視点操作を許可
         if event.type in {'MIDDLEMOUSE', 'WHEELUPMOUSE', 'WHEELDOWNMOUSE', 'MOUSEMOVE'}:
+            return {'PASS_THROUGH'}
+        
+        # テンキー操作を許可
+        if event.type in {'NUMPAD_0', 'NUMPAD_1', 'NUMPAD_2', 'NUMPAD_3', 'NUMPAD_4', 
+                          'NUMPAD_5', 'NUMPAD_6', 'NUMPAD_7', 'NUMPAD_8', 'NUMPAD_9', 
+                          'NUMPAD_PLUS', 'NUMPAD_MINUS', 'NUMPAD_ASTERIX', 
+                          'NUMPAD_SLASH', 'NUMPAD_PERIOD'}:
             return {'PASS_THROUGH'}
         
         context.space_data.overlay.show_object_origins = False
@@ -116,7 +118,6 @@ class AKM_OT_ArrowMove(bpy.types.Operator):
                 if context.active_object:
                     self.save_verts(context)
                     self.save_view(context)
-                    self.save_shading(context)
                     if bpy.context.scene.akm_hide_vert:
                         self.save_verts_disp(context)
                     if bpy.context.scene.akm_center:
@@ -126,16 +127,6 @@ class AKM_OT_ArrowMove(bpy.types.Operator):
         
         return {'CANCELLED'}
     
-    def save_shading(self, context):
-        shading = context.space_data.shading
-        self.original_show_xray  = shading.show_xray
-        self.original_xray_alpha = shading.xray_alpha
-        
-    def restore_shading(self, context):
-        shading = context.space_data.shading
-        shading.show_xray  = self.original_show_xray
-        shading.xray_alpha = self.original_xray_alpha
-        
     def save_view(self, context):
         
         # 現在の3Dビューの設定を保存
@@ -146,6 +137,7 @@ class AKM_OT_ArrowMove(bpy.types.Operator):
         self.original_show_cursor = space_data.overlay.show_cursor
         self.original_show_retopo = space_data.overlay.show_retopology
         self.original_show_origin = space_data.overlay.show_object_origins
+        self.original_sharing_xray = space_data.shading.show_xray
         self.original_cursor_location = context.scene.cursor.location.copy()
         self.original_object_location = context.active_object.location.copy()
         
@@ -158,6 +150,9 @@ class AKM_OT_ArrowMove(bpy.types.Operator):
         # リトポロジー表示切替
         if bpy.context.scene.akm_show_retopo:
             space_data.overlay.show_retopology = True
+        # 透過表示切替
+        if bpy.context.scene.akm_xray:
+            space_data.shading.show_xray = True
         
     def restore_view(self, context):
         
@@ -169,6 +164,7 @@ class AKM_OT_ArrowMove(bpy.types.Operator):
         space_data.overlay.show_cursor = self.original_show_cursor
         space_data.overlay.show_retopology = self.original_show_retopo
         space_data.overlay.show_object_origins = self.original_show_origin
+        space_data.shading.show_xray = self.original_sharing_xray
         context.scene.cursor.location  = self.original_cursor_location
         context.active_object.location = self.original_object_location
     

@@ -9,6 +9,7 @@ def init_props():
     bpy.types.Scene.akm_hide_vert   = BoolProperty(default=True)
     bpy.types.Scene.akm_hide_view   = BoolProperty(default=True)
     bpy.types.Scene.akm_show_retopo = BoolProperty(default=False)
+    bpy.types.Scene.akm_xray        = BoolProperty(default=False)
 
 # プロパティのクリア
 def clear_props():
@@ -17,4 +18,5 @@ def clear_props():
     del bpy.types.Scene.akm_hide_vert
     del bpy.types.Scene.akm_hide_view
     del bpy.types.Scene.akm_show_retopo
+    del bpy.types.Scene.akm_xray
 
