@@ -17,7 +17,7 @@ translation_dict = {
         ("*", "Amount of movement") : "移動量",
         ("*", "Hide unselected vertices") : "非選択の頂点を隠す",
         ("*", "Hide view display") : "ビュー表示を隠す",
-        ("*", "Retopology Display") : "リトポロジー表示",
+        ("*", "Retopology display") : "リトポロジー表示",
         ("*", "Transparent display") : "透過表示",
     }
 }
